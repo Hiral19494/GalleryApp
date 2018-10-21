@@ -1,9 +1,12 @@
 package ca.android.galleryapp;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.w3c.dom.Document;
@@ -12,7 +15,6 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import ca.android.galleryapp.model.GalleryItem;
 
@@ -20,8 +22,10 @@ public class GalleryActivity extends BaseActivity {
 
     String url;
     GridView gdGallery;
-    List<GalleryItem> galleryItemList;
+    ArrayList<GalleryItem> galleryItemList = new ArrayList<>();
     GalleryItemAdapter galleryItemAdapter;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +38,18 @@ public class GalleryActivity extends BaseActivity {
                 .appendQueryParameter("extras", BaseActivity.KEY_IMAGE)
                 .build().toString();
         gdGallery = (GridView) findViewById(R.id.gd_gallery);
-        galleryItemList = new ArrayList<>();
+     Log.d("url",url);
         new GalleryApp().execute();
+
+        gdGallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent in = new Intent(getApplicationContext(), ImageDetailsActivity.class);
+                Log.d("ff", String.valueOf(galleryItemList.get(position)));
+                in.putExtra(ImageDetailsActivity.PRODUCT, galleryItemList.get(position));
+                startActivity(in);
+            }
+        });
     }
 
     private class GalleryApp extends AsyncTask<Void, Void, Void> {
@@ -52,10 +66,12 @@ public class GalleryActivity extends BaseActivity {
                 // creating new HashMap
                 HashMap<String, String> map = new HashMap<String, String>();
                 Element e = (Element) nl.item(i);
-                String name = e.getAttribute(KEY_IMAGE);
-                Log.d("name",name);
                 GalleryItem galleryItem = new GalleryItem();
-                galleryItem.setGalleryImage(name);
+                galleryItem.setGalleryImage(e.getAttribute(KEY_IMAGE));
+                galleryItem.setId(e.getAttribute(KEY_ID));
+                galleryItem.setTitle(e.getAttribute(KEY_TITLE));
+                Log.d("dd", galleryItem.getGalleryImage());
+                Log.d("title",galleryItem.getTitle());
                 galleryItemList.add(galleryItem);
                 // adding each child node to HashMap key => value
 
